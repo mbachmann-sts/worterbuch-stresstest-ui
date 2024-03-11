@@ -1,25 +1,50 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { Worterbuch, useSubscribe } from "worterbuch-react";
+import { List } from "react-virtualized";
 
-function App() {
+export default function App() {
+  const config = {
+    backendScheme: "ws",
+    backendHost: "localhost",
+    backendPort: "8080",
+    backendPath: "/ws",
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Worterbuch automaticReconnect config={config}>
+      <ItemList />
+    </Worterbuch>
   );
 }
 
-export default App;
+function ItemList() {
+  const rowKeys = [];
+  for (let i = 0; i < 50_000; i++) {
+    rowKeys.push("worterbuch-virtualized/" + i);
+  }
+
+  const rowRenderer = ({ key, index, style }) => {
+    return (
+      <ListRow key={key} wbKey={rowKeys[index]} style={style} index={index} />
+    );
+  };
+
+  return (
+    <List
+      width={300}
+      height={300}
+      rowCount={rowKeys.length}
+      rowHeight={20}
+      rowRenderer={rowRenderer}
+    />
+  );
+}
+
+function ListRow({ wbKey, index, style }) {
+  const value = useSubscribe(wbKey);
+  return (
+    <div style={style}>
+      {index}: {value}
+    </div>
+  );
+}
