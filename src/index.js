@@ -27,7 +27,7 @@ function App() {
 
 function ItemList() {
   const rowKeys = [];
-  for (let i = 0; i < 50_000; i++) {
+  for (let i = 0; i < 1_000; i++) {
     rowKeys.push("worterbuch-virtualized/" + i);
   }
 
