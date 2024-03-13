@@ -1,6 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { Worterbuch, useSubscribe } from "worterbuch-react";
+import {
+  Worterbuch,
+  useLs,
+  useSubscribe,
+  useSubscribeLs,
+} from "worterbuch-react";
 import { List } from "react-virtualized";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
@@ -13,7 +18,7 @@ root.render(
 function App() {
   const config = {
     backendScheme: "ws",
-    backendHost: "thinkpad-p14s",
+    backendHost: "192.168.178.43",
     backendPort: "8080",
     backendPath: "/ws",
   };
@@ -26,14 +31,26 @@ function App() {
 }
 
 function ItemList() {
+  const blocksKey = "stagenetCustom/blocks";
+
+  const blocks = useSubscribeLs(blocksKey);
+
   const rowKeys = [];
-  for (let i = 0; i < 1_000; i++) {
-    rowKeys.push("worterbuch-virtualized/" + i);
+  if (blocks) {
+    blocks.sort((a, b) => a.localeCompare(b, "en", { numeric: true }));
+    for (const block of blocks) {
+      rowKeys.push(`${blocksKey}/${block}/parameter/Delay/expectedValue`);
+    }
   }
 
-  const rowRenderer = ({ key, index, style }) => {
+  const rowRenderer = ({ index, style }) => {
     return (
-      <ListRow key={key} wbKey={rowKeys[index]} style={style} index={index} />
+      <ListRow
+        key={blocks[index]}
+        block={blocks[index]}
+        wbKey={rowKeys[index]}
+        style={style}
+      />
     );
   };
 
@@ -48,11 +65,11 @@ function ItemList() {
   );
 }
 
-function ListRow({ wbKey, index, style }) {
+function ListRow({ wbKey, block, style }) {
   const value = useSubscribe(wbKey);
   return (
     <div style={style}>
-      {index}: {value}
+      {block}: {value}
     </div>
   );
 }
